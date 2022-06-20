@@ -24,8 +24,22 @@ async function run() {
     //GET API
     app.get("/clients", async (req, res) => {
       const cursor = clientsCollection.find({});
-      const products = await cursor.toArray();
-      res.send(products);
+      const page = req.query.page;
+      const size = parseInt(req.query.size);
+      let clients;
+      const count = await cursor.count();
+      if (page) {
+        clients = await cursor
+          .skip(page * size)
+          .limit(size)
+          .toArray();
+      } else {
+        clients = await cursor.toArray();
+      }
+      res.send({
+        count,
+        clients,
+      });
     });
     //POST API
     app.post("/client", async (req, res) => {
